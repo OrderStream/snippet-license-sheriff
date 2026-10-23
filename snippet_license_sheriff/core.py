@@ -37,13 +37,23 @@ class LicenseContamination:
     remediation: str
 
 class ASTFingerprinter:
-    @staticmethod
-    def normalize_and_fingerprint(code: str) -> str:
+    RESERVED_KEYWORDS = {
+        "def", "class", "return", "if", "elif", "else", "for", "while", "try",
+        "except", "finally", "with", "as", "import", "from", "function", "const",
+        "let", "var", "async", "await", "yield", "raise", "throw", "catch",
+        "break", "continue", "pass", "None", "True", "False", "true", "false",
+        "null", "undefined", "new", "switch", "case", "default", "in", "is", "not"
+    }
+
+    @classmethod
+    def normalize_and_fingerprint(cls, code: str) -> str:
         """
-        Strips comments, normalizes variable names to canonical tokens, and computes SHA-256 fingerprint.
+        Strips comments, docstrings, normalizes variable names to canonical tokens, and computes SHA-256 fingerprint.
         """
-        # Remove comments
-        clean = re.sub(r"#.*", "", code)
+        # Remove comments and docstrings
+        clean = re.sub(r'"""[\s\S]*?"""', "", code)
+        clean = re.sub(r"'''[\s\S]*?'''", "", clean)
+        clean = re.sub(r"#.*", "", clean)
         clean = re.sub(r"//.*", "", clean)
         clean = re.sub(r"/\*.*?\*/", "", clean, flags=re.DOTALL)
 
@@ -54,7 +64,7 @@ class ASTFingerprinter:
 
         for t in tokens:
             if re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", t):
-                if t not in {"def", "class", "return", "if", "for", "while", "import", "from", "function", "const", "let", "var"}:
+                if t not in cls.RESERVED_KEYWORDS:
                     if t not in var_map:
                         var_map[t] = f"v_{len(var_map)}"
                     normalized_tokens.append(var_map[t])

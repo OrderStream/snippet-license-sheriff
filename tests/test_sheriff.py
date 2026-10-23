@@ -40,6 +40,34 @@ def compute_sum(input_buffer):
     fp2 = ASTFingerprinter.normalize_and_fingerprint(c2)
     assert fp1 == fp2
 
+def test_docstring_and_control_flow_keywords():
+    code_a = '''
+"""Module documentation for algorithm A."""
+def evaluate(val):
+    try:
+        if val > 0:
+            return val
+        else:
+            return 0
+    except Exception:
+        return -1
+'''
+    code_b = '''
+"""Different docstring for algorithm B."""
+def process(number):
+    try:
+        if number > 0:
+            return number
+        else:
+            return 0
+    except Exception:
+        return -1
+'''
+    fp_a = ASTFingerprinter.normalize_and_fingerprint(code_a)
+    fp_b = ASTFingerprinter.normalize_and_fingerprint(code_b)
+    # Different docstrings and renamed parameter, but identical control-flow AST structure!
+    assert fp_a == fp_b
+
 def test_viral_header_detection(tmp_path):
     viral_code = """/*
  * This program is free software: you can redistribute it and/or modify
