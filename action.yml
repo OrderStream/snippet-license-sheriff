@@ -1,0 +1,47 @@
+name: "Snippet License Sheriff"
+description: "Block viral GPL/AGPL copy-pasted license contamination in proprietary repositories"
+branding:
+  icon: "file-text"
+  color: "red"
+inputs:
+  path:
+    description: "Directory path to scan"
+    required: false
+    default: "."
+  allowed:
+    description: "Comma-separated allowed open-source licenses"
+    required: false
+    default: "MIT,Apache-2.0,BSD-3-Clause,BSD-2-Clause,ISC"
+  fail_on_detected:
+    description: "Fail CI if viral license contamination is detected"
+    required: false
+    default: "true"
+  license_key:
+    description: "OrderStream Pro/Enterprise license key (optional)"
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - name: Install snippet-license-sheriff
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ${{ github.action_path }}
+    - name: Run License Contamination Audit
+      shell: bash
+      env:
+        ORDERSTREAM_LICENSE_KEY: ${{ inputs.license_key }}
+      run: |
+        FAIL_FLAG=""
+        if [ "${{ inputs.fail_on_detected }}" = "true" ]; then
+          FAIL_FLAG="--fail-on-detected"
+        fi
+        snippet-license-sheriff scan \
+          --path "${{ inputs.path }}" \
+          --allowed "${{ inputs.allowed }}" \
+          $FAIL_FLAG

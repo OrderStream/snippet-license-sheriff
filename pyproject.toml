@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "snippet-license-sheriff"
+version = "1.0.0"
+description = "Structural AST code fingerprinting engine checking against viral GPL/AGPL copy-pasted license contamination in proprietary repos."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "OrderStream", email = "orderstream@users.noreply.github.com" }]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Security",
+]
+dependencies = []
+
+[project.scripts]
+snippet-license-sheriff = "snippet_license_sheriff.cli:main"
